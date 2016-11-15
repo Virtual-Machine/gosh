@@ -1,0 +1,4 @@
+#This is a basic gosh example
+echo "Hello world!!" "Okay"
+exec "pwd" $pwd
+echo $pwd

@@ -6,15 +6,34 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
+	"regexp"
 )
 
 var (
 	version = "0.0.1"
 	info    *log.Logger
+	method  = make(map[string]int)
+	regex   *regexp.Regexp
 )
 
 func init() {
-	log.SetFlags(log.Lshortfile)
+	log.SetFlags(0)
+	method["create"] = 2
+	method["cd"] = 2
+	method["rm"] = 2
+	method["cp"] = 3
+	method["mv"] = 3
+	method["write"] = 3
+	method["append"] = 3
+	method["read"] = 2
+	method["set"] = 3
+	method["echo"] = 2
+	method["find"] = 3
+	method["each"] = 3
+	method["method"] = 3
+	method["exec"] = 3
+	regex = regexp.MustCompile(`("[^"]+"|\$?\w+)`)
 }
 
 func main() {
@@ -49,12 +68,15 @@ func evaluate(filePath string) {
 
 	lines := bytes.Split(contents, []byte("\n"))
 
-	lines = removeComments(lines)
-
-	for _, i := range lines {
-		tokens := bytes.Split(i, []byte(" "))
-		// Interpret and verify syntax of line
-
+	for n, i := range lines {
+		if i[0] == []byte("#")[0] {
+			continue
+		}
+		tokens := regex.FindAll(i, -1)
+		for _, v := range tokens {
+			fmt.Println(string(v))
+		}
+		verifyTokenSlice(filePath, tokens, n+1)
 		// Insert interpreted instruction to vm
 
 	}
@@ -64,16 +86,25 @@ func evaluate(filePath string) {
 	// Immediately stop if a command execution results in an error
 }
 
-func removeComments(lines [][]byte) [][]byte {
-	var syntaxLines [][]byte
-	for _, i := range lines {
-		if len(i) > 0 {
-			if i[0] != []byte("#")[0] {
-				syntaxLines = append(syntaxLines, i)
-			}
-		}
+func verifyTokenSlice(filePath string, tokens [][]byte, lineNum int) {
+	length := len(tokens)
+	action := string(tokens[0])
+	reqLength := method[action]
+	if reqLength == 0 {
+		cmdName := "grep"
+		cmdArgs := []string{"--color=always", "-n", "-3", action, filePath}
+		cmdOut, _ := exec.Command(cmdName, cmdArgs...).Output()
+		log.Println(string(cmdOut))
+		log.Fatal("Bad method name: " + action)
 	}
-	return syntaxLines
+	if length < reqLength {
+		cmdName := "grep"
+		cmdArgs := []string{"--color=always", "-n", "-3", action, filePath}
+		cmdOut, _ := exec.Command(cmdName, cmdArgs...).Output()
+		log.Println(string(cmdOut))
+		log.Println(action, "requires:", reqLength-1, "parameters")
+		log.Fatal("Not enough parameters to method: " + action)
+	}
 }
 
 func getContents(filePath string) []byte {

@@ -8,7 +8,60 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strings"
 )
+
+type vmAction struct {
+	method string
+	params []string
+}
+
+type vm struct {
+	actions []vmAction
+	state   map[string]string
+}
+
+func (v *vm) beginExecution() {
+	for _, i := range v.actions {
+		v.execute(i)
+	}
+}
+
+func (v *vm) execute(action vmAction) {
+	info.Println("\033[40mExecuting:", action, "\033[49m")
+	switch action.method {
+	case "echo":
+		for n, i := range action.params {
+			if n != 0 {
+				fmt.Print(" ")
+			}
+			fmt.Print(strings.Trim(i, "\""))
+		}
+		fmt.Print("\n")
+	case "exec":
+		command := action.params[0]
+		// var variable string
+		if len(action.params) > 1 {
+			// variable = action.params[1]
+		}
+		command = strings.Trim(command, "\"")
+		parts := strings.Split(command, " ")
+		cmdName := parts[0]
+		var cmdArgs []string
+		if len(parts) > 1 {
+			cmdArgs = parts[1:]
+		}
+		cmdOut, err := exec.Command(cmdName, cmdArgs...).Output()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "There was an error running the command: ", err)
+			os.Exit(1)
+		}
+		fmt.Print(string(cmdOut))
+	default:
+		fmt.Println(action)
+	}
+	fmt.Println("")
+}
 
 var (
 	version = "0.0.1"
@@ -32,7 +85,7 @@ func init() {
 	method["find"] = 3
 	method["each"] = 3
 	method["method"] = 3
-	method["exec"] = 3
+	method["exec"] = 2
 	regex = regexp.MustCompile(`("[^"]+"|\$?\w+)`)
 }
 
@@ -68,25 +121,21 @@ func evaluate(filePath string) {
 
 	lines := bytes.Split(contents, []byte("\n"))
 
+	var run vm
+
 	for n, i := range lines {
 		if i[0] == []byte("#")[0] {
 			continue
 		}
 		tokens := regex.FindAll(i, -1)
-		for _, v := range tokens {
-			fmt.Println(string(v))
-		}
-		verifyTokenSlice(filePath, tokens, n+1)
-		// Insert interpreted instruction to vm
-
+		action := verifyTokenSlice(filePath, tokens, n+1)
+		run.actions = append(run.actions, action)
 	}
-	// If there were no errors:
-	// Loop interpreted instruction set
-	// Execute each command in sequential order
-	// Immediately stop if a command execution results in an error
+
+	run.beginExecution()
 }
 
-func verifyTokenSlice(filePath string, tokens [][]byte, lineNum int) {
+func verifyTokenSlice(filePath string, tokens [][]byte, lineNum int) vmAction {
 	length := len(tokens)
 	action := string(tokens[0])
 	reqLength := method[action]
@@ -105,6 +154,11 @@ func verifyTokenSlice(filePath string, tokens [][]byte, lineNum int) {
 		log.Println(action, "requires:", reqLength-1, "parameters")
 		log.Fatal("Not enough parameters to method: " + action)
 	}
+	var parameters []string
+	for _, i := range tokens[1:] {
+		parameters = append(parameters, string(i))
+	}
+	return vmAction{method: action, params: parameters}
 }
 
 func getContents(filePath string) []byte {

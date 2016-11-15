@@ -52,8 +52,7 @@ func evaluate(filePath string) {
 	lines = removeComments(lines)
 
 	for _, i := range lines {
-		// Split line into tokens
-
+		tokens := bytes.Split(i, []byte(" "))
 		// Interpret and verify syntax of line
 
 		// Insert interpreted instruction to vm

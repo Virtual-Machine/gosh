@@ -22,6 +22,7 @@ type vm struct {
 }
 
 func (v *vm) beginExecution() {
+	v.state = make(map[string]string)
 	for _, i := range v.actions {
 		v.execute(i)
 	}
@@ -35,14 +36,18 @@ func (v *vm) execute(action vmAction) {
 			if n != 0 {
 				fmt.Print(" ")
 			}
-			fmt.Print(strings.Trim(i, "\""))
+			if i[0] == '$' {
+				fmt.Println(v.state[i])
+			} else {
+				fmt.Print(strings.Trim(i, "\""))
+			}
 		}
 		fmt.Print("\n")
 	case "exec":
 		command := action.params[0]
-		// var variable string
+		var variable string
 		if len(action.params) > 1 {
-			// variable = action.params[1]
+			variable = action.params[1]
 		}
 		command = strings.Trim(command, "\"")
 		parts := strings.Split(command, " ")
@@ -56,7 +61,11 @@ func (v *vm) execute(action vmAction) {
 			fmt.Fprintln(os.Stderr, "There was an error running the command: ", err)
 			os.Exit(1)
 		}
-		fmt.Print(string(cmdOut))
+		if variable == "" {
+			fmt.Print(string(cmdOut))
+		} else {
+			v.state[variable] = string(cmdOut)
+		}
 	default:
 		fmt.Println(action)
 	}

@@ -56,7 +56,7 @@ func (v *vm) execute(action vmAction) {
 		if len(parts) > 1 {
 			for _, i := range parts[1:] {
 				if i[0] == '~' {
-					cmdArgs = append(cmdArgs, strings.Replace(i, "~", userHome))
+					cmdArgs = append(cmdArgs, strings.Replace(i, "~", userHome, 1))
 				} else {
 					cmdArgs = append(cmdArgs, i)
 				}
@@ -81,7 +81,7 @@ func (v *vm) execute(action vmAction) {
 		}
 		filename = strings.Trim(filename, "\"")
 		if filename[0] == '~' {
-			filename = strings.Replace(filename, "~", userHome)
+			filename = strings.Replace(filename, "~", userHome, 1)
 		}
 		_, err := os.Stat(filename)
 		if err != nil && os.IsNotExist(err) {
@@ -99,7 +99,7 @@ func (v *vm) execute(action vmAction) {
 		}
 		dir = strings.Trim(dir, "\"")
 		if dir[0] == '~' {
-			dir = strings.Replace(dir, "~", userHome)
+			dir = strings.Replace(dir, "~", userHome, 1)
 		}
 		err := os.Chdir(dir)
 		if err != nil {
@@ -112,7 +112,7 @@ func (v *vm) execute(action vmAction) {
 		}
 		file = strings.Trim(file, "\"")
 		if file[0] == '~' {
-			file = strings.Replace(file, "~", userHome)
+			file = strings.Replace(file, "~", userHome, 1)
 		}
 		_, err := os.Stat(file)
 		if err != nil && os.IsNotExist(err) {

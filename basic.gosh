@@ -1,12 +1,12 @@
 #This is a basic gosh example
 echo "Hello world!!" "Okay"
 exec "pwd" $pwd
-exec "ls /Users/dwork/Desktop"
+exec "ls ~/Desktop"
 echo $pwd
-set $tmp "/Users/dwork/ActiveProjects/gosh/tmp"
+set $tmp "./tmp"
 create $tmp
 cd ".."
 exec "pwd"
 cd "gosh"
 exec "pwd"
-rm $tmp
+rm "./tmp"

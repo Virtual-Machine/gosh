@@ -54,7 +54,13 @@ func (v *vm) execute(action vmAction) {
 		cmdName := parts[0]
 		var cmdArgs []string
 		if len(parts) > 1 {
-			cmdArgs = parts[1:]
+			for _, i := range parts[1:] {
+				if i[0] == '~' {
+					cmdArgs = append(cmdArgs, strings.Replace(i, "~", userHome))
+				} else {
+					cmdArgs = append(cmdArgs, i)
+				}
+			}
 		}
 		cmdOut, err := exec.Command(cmdName, cmdArgs...).Output()
 		if err != nil {
@@ -73,6 +79,10 @@ func (v *vm) execute(action vmAction) {
 		if filename[0] == '$' {
 			filename = v.state[filename]
 		}
+		filename = strings.Trim(filename, "\"")
+		if filename[0] == '~' {
+			filename = strings.Replace(filename, "~", userHome)
+		}
 		_, err := os.Stat(filename)
 		if err != nil && os.IsNotExist(err) {
 			info.Println("Creating file: " + filename)
@@ -88,6 +98,9 @@ func (v *vm) execute(action vmAction) {
 			dir = v.state[dir]
 		}
 		dir = strings.Trim(dir, "\"")
+		if dir[0] == '~' {
+			dir = strings.Replace(dir, "~", userHome)
+		}
 		err := os.Chdir(dir)
 		if err != nil {
 			log.Fatal("Unable to change directory to: ", dir)
@@ -98,6 +111,9 @@ func (v *vm) execute(action vmAction) {
 			file = v.state[file]
 		}
 		file = strings.Trim(file, "\"")
+		if file[0] == '~' {
+			file = strings.Replace(file, "~", userHome)
+		}
 		_, err := os.Stat(file)
 		if err != nil && os.IsNotExist(err) {
 			log.Fatal("File/directory not found: " + file)
@@ -114,10 +130,11 @@ func (v *vm) execute(action vmAction) {
 }
 
 var (
-	version = "0.0.1"
-	info    *log.Logger
-	method  = make(map[string]int)
-	regex   *regexp.Regexp
+	version  = "0.0.1"
+	info     *log.Logger
+	method   = make(map[string]int)
+	regex    *regexp.Regexp
+	userHome string
 )
 
 func init() {
@@ -137,6 +154,7 @@ func init() {
 	method["method"] = 3
 	method["exec"] = 2
 	regex = regexp.MustCompile(`("[^"]+"|\$?\w+)`)
+	userHome = os.Getenv("HOME")
 }
 
 func main() {

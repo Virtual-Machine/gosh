@@ -192,12 +192,14 @@ func evaluate(filePath string) {
 	var run vm
 
 	for n, i := range lines {
-		if i[0] == []byte("#")[0] {
-			continue
+		if len(i) > 0 {
+			if i[0] == []byte("#")[0] {
+				continue
+			}
+			tokens := regex.FindAll(i, -1)
+			action := verifyTokenSlice(filePath, tokens, n+1)
+			run.actions = append(run.actions, action)
 		}
-		tokens := regex.FindAll(i, -1)
-		action := verifyTokenSlice(filePath, tokens, n+1)
-		run.actions = append(run.actions, action)
 	}
 
 	run.beginExecution()

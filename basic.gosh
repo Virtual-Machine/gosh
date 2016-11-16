@@ -10,3 +10,4 @@ exec "pwd"
 cd "gosh"
 exec "pwd"
 rm "./tmp"
+

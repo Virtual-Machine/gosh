@@ -92,6 +92,21 @@ func (v *vm) execute(action vmAction) {
 		if err != nil {
 			log.Fatal("Unable to change directory to: ", dir)
 		}
+	case "rm":
+		file := action.params[0]
+		if file[0] == '$' {
+			file = v.state[file]
+		}
+		file = strings.Trim(file, "\"")
+		_, err := os.Stat(file)
+		if err != nil && os.IsNotExist(err) {
+			log.Fatal("File/directory not found: " + file)
+		} else if err != nil {
+			log.Fatal("Could not remove file/directory as expected, try again")
+		} else {
+			info.Println("Removing file/directory: " + file)
+			os.Remove(file)
+		}
 	default:
 		fmt.Println(action)
 	}

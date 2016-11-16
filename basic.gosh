@@ -5,7 +5,8 @@ exec "ls /Users/dwork/Desktop"
 echo $pwd
 set $tmp "/Users/dwork/ActiveProjects/gosh/tmp"
 create $tmp
-cd "/Users/dwork/ActiveProjects"
+cd ".."
 exec "pwd"
-cd gosh
+cd "gosh"
 exec "pwd"
+rm $tmp

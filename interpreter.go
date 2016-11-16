@@ -66,6 +66,32 @@ func (v *vm) execute(action vmAction) {
 		} else {
 			v.state[variable] = string(cmdOut)
 		}
+	case "set":
+		v.state[action.params[0]] = strings.Trim(action.params[1], "\"")
+	case "create":
+		filename := action.params[0]
+		if filename[0] == '$' {
+			filename = v.state[filename]
+		}
+		_, err := os.Stat(filename)
+		if err != nil && os.IsNotExist(err) {
+			info.Println("Creating file: " + filename)
+			ioutil.WriteFile(filename, []byte(""), 0644)
+		} else if err != nil {
+			log.Fatal("Could not create file as expected")
+		} else {
+			log.Fatal("File already exists with that name")
+		}
+	case "cd":
+		dir := action.params[0]
+		if dir[0] == '$' {
+			dir = v.state[dir]
+		}
+		dir = strings.Trim(dir, "\"")
+		err := os.Chdir(dir)
+		if err != nil {
+			log.Fatal("Unable to change directory to: ", dir)
+		}
 	default:
 		fmt.Println(action)
 	}

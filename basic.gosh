@@ -3,3 +3,9 @@ echo "Hello world!!" "Okay"
 exec "pwd" $pwd
 exec "ls /Users/dwork/Desktop"
 echo $pwd
+set $tmp "/Users/dwork/ActiveProjects/gosh/tmp"
+create $tmp
+cd "/Users/dwork/ActiveProjects"
+exec "pwd"
+cd gosh
+exec "pwd"

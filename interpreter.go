@@ -76,13 +76,7 @@ func (v *vm) execute(action vmAction) {
 		v.state[action.params[0]] = strings.Trim(action.params[1], "\"")
 	case "create":
 		filename := action.params[0]
-		if filename[0] == '$' {
-			filename = v.state[filename]
-		}
-		filename = strings.Trim(filename, "\"")
-		if filename[0] == '~' {
-			filename = strings.Replace(filename, "~", userHome, 1)
-		}
+		filename = v.processTokenString(filename)
 		_, err := os.Stat(filename)
 		if err != nil && os.IsNotExist(err) {
 			info.Println("Creating file: " + filename)
@@ -94,13 +88,7 @@ func (v *vm) execute(action vmAction) {
 		}
 	case "mkdir":
 		folder := action.params[0]
-		if folder[0] == '$' {
-			folder = v.state[folder]
-		}
-		folder = strings.Trim(folder, "\"")
-		if folder[0] == '~' {
-			folder = strings.Replace(folder, "~", userHome, 1)
-		}
+		folder = v.processTokenString(folder)
 		_, err := os.Stat(folder)
 		if err != nil && os.IsNotExist(err) {
 			info.Println("Creating folder: " + folder)
@@ -112,26 +100,14 @@ func (v *vm) execute(action vmAction) {
 		}
 	case "cd":
 		dir := action.params[0]
-		if dir[0] == '$' {
-			dir = v.state[dir]
-		}
-		dir = strings.Trim(dir, "\"")
-		if dir[0] == '~' {
-			dir = strings.Replace(dir, "~", userHome, 1)
-		}
+		dir = v.processTokenString(dir)
 		err := os.Chdir(dir)
 		if err != nil {
 			log.Fatal("Unable to change directory to: ", dir)
 		}
 	case "rm":
 		file := action.params[0]
-		if file[0] == '$' {
-			file = v.state[file]
-		}
-		file = strings.Trim(file, "\"")
-		if file[0] == '~' {
-			file = strings.Replace(file, "~", userHome, 1)
-		}
+		file = v.processTokenString(file)
 		_, err := os.Stat(file)
 		if err != nil && os.IsNotExist(err) {
 			log.Fatal("File/directory not found: " + file)
@@ -145,6 +121,17 @@ func (v *vm) execute(action vmAction) {
 		fmt.Println(action)
 	}
 	fmt.Println("")
+}
+
+func (v *vm) processTokenString(token string) string {
+	if token[0] == '$' {
+		token = v.state[token]
+	}
+	token = strings.Trim(token, "\"")
+	if token[0] == '~' {
+		token = strings.Replace(token, "~", userHome, 1)
+	}
+	return token
 }
 
 var (

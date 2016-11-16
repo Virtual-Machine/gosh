@@ -90,7 +90,25 @@ func (v *vm) execute(action vmAction) {
 		} else if err != nil {
 			log.Fatal("Could not create file as expected")
 		} else {
-			log.Fatal("File already exists with that name")
+			log.Fatal("File/folder already exists with that name")
+		}
+	case "mkdir":
+		folder := action.params[0]
+		if folder[0] == '$' {
+			folder = v.state[folder]
+		}
+		folder = strings.Trim(folder, "\"")
+		if folder[0] == '~' {
+			folder = strings.Replace(folder, "~", userHome, 1)
+		}
+		_, err := os.Stat(folder)
+		if err != nil && os.IsNotExist(err) {
+			info.Println("Creating folder: " + folder)
+			os.Mkdir(folder, 0700)
+		} else if err != nil {
+			log.Fatal("Could not create folder as expected")
+		} else {
+			log.Fatal("File/folder already exists with that name")
 		}
 	case "cd":
 		dir := action.params[0]
@@ -140,6 +158,7 @@ var (
 func init() {
 	log.SetFlags(0)
 	method["create"] = 2
+	method["mkdir"] = 2
 	method["cd"] = 2
 	method["rm"] = 2
 	method["cp"] = 3

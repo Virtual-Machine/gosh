@@ -9,5 +9,6 @@ cd ".."
 exec "pwd"
 cd "gosh"
 exec "pwd"
-rm "./tmp"
+rm $tmp
 
+mkdir "cool"

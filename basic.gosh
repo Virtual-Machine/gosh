@@ -12,3 +12,8 @@ exec "pwd"
 rm $tmp
 
 mkdir "cool"
+create "cool/testfile"
+cp cool test
+exec "ls test"
+rm cool
+rm test

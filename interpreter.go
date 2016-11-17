@@ -117,6 +117,29 @@ func (v *vm) execute(action vmAction) {
 			info.Println("Removing file/directory: " + file)
 			os.Remove(file)
 		}
+	case "cp":
+		source := action.params[0]
+		source = v.processTokenString(source)
+		destination := action.params[1]
+		destination = v.processTokenString(destination)
+		_, err := os.Stat(source)
+		if err != nil && os.IsNotExist(err) {
+			log.Fatal("Source not found: " + source)
+		} else if err != nil {
+			log.Fatal("Unexpected error", err)
+		} else {
+			_, err = os.Stat(destination)
+			if err != nil && os.IsNotExist(err) {
+				err := exec.Command("cp", []string{"-R", source, destination}...).Run()
+				if err != nil {
+					log.Fatal(err)
+				}
+			} else if err != nil {
+				log.Fatal("Unexpected error", err)
+			} else {
+				log.Fatal("Destination already exists, cp can't overwrite")
+			}
+		}
 	default:
 		fmt.Println(action)
 	}

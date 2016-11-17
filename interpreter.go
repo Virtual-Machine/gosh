@@ -182,7 +182,7 @@ func init() {
 	method["each"] = 3
 	method["method"] = 3
 	method["exec"] = 2
-	regex = regexp.MustCompile(`("[^"]+"|\$?\w+)`)
+	regex = regexp.MustCompile(`("[^"]+"|\$?[\w\/~\.]+)`)
 	userHome = os.Getenv("HOME")
 }
 

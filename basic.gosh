@@ -3,16 +3,16 @@ echo "Hello world!!" "Okay"
 exec "pwd" $pwd
 exec "ls ~/Desktop"
 echo $pwd
-set $tmp "./tmp"
+set $tmp ./tmp
 create $tmp
-cd ".."
+cd ..
 exec "pwd"
-cd "gosh"
+cd gosh
 exec "pwd"
 rm $tmp
 
-mkdir "cool"
-create "cool/testfile"
+mkdir cool
+create cool/testfile
 cp cool test
 exec "ls test"
 rm cool

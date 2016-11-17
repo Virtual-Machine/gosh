@@ -115,7 +115,7 @@ func (v *vm) execute(action vmAction) {
 			log.Fatal("Could not remove file/directory as expected, try again")
 		} else {
 			info.Println("Removing file/directory: " + file)
-			os.Remove(file)
+			os.RemoveAll(file)
 		}
 	case "cp":
 		source := action.params[0]

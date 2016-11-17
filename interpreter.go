@@ -140,6 +140,29 @@ func (v *vm) execute(action vmAction) {
 				log.Fatal("Destination already exists, cp can't overwrite")
 			}
 		}
+	case "mv":
+		source := action.params[0]
+		source = v.processTokenString(source)
+		destination := action.params[1]
+		destination = v.processTokenString(destination)
+		_, err := os.Stat(source)
+		if err != nil && os.IsNotExist(err) {
+			log.Fatal("Source not found: " + source)
+		} else if err != nil {
+			log.Fatal("Unexpected error", err)
+		} else {
+			_, err = os.Stat(destination)
+			if err != nil && os.IsNotExist(err) {
+				err := exec.Command("mv", []string{source, destination}...).Run()
+				if err != nil {
+					log.Fatal(err)
+				}
+			} else if err != nil {
+				log.Fatal("Unexpected error", err)
+			} else {
+				log.Fatal("Destination already exists, mv can't overwrite")
+			}
+		}
 	default:
 		fmt.Println(action)
 	}

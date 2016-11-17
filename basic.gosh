@@ -14,6 +14,8 @@ rm $tmp
 mkdir cool
 create cool/testfile
 cp cool test
-exec "ls test"
+mv test tester
+exec "ls tester"
+exec "ls"
 rm cool
-rm test
+rm tester

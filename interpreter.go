@@ -169,6 +169,10 @@ func (v *vm) execute(action vmAction) {
 	case "read":
 		source := action.params[0]
 		source = v.processTokenString(source)
+		var variable string
+		if len(action.params) > 1 {
+			variable = action.params[1]
+		}
 		_, err := os.Stat(source)
 		if err != nil && os.IsNotExist(err) {
 			log.Fatal("Source not found: " + source)
@@ -180,7 +184,11 @@ func (v *vm) execute(action vmAction) {
 				log.Fatal("Unable to read data from file")
 			}
 			info.Println("Read data from: " + source)
-			fmt.Println(string(data))
+			if variable == "" {
+				fmt.Println(string(data))
+			} else {
+				v.state[variable] = string(data)
+			}
 		}
 	default:
 		fmt.Println(action)

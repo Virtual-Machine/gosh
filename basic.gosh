@@ -20,4 +20,5 @@ exec "ls"
 rm cool
 rm tester
 
-read README.md
+read README.md $readme
+echo $readme

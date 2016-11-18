@@ -21,4 +21,6 @@ rm cool
 rm tester
 
 read README.md $readme
-echo $readme
+write DUP.md $readme
+read DUP.md
+rm DUP.md

@@ -190,6 +190,16 @@ func (v *vm) execute(action vmAction) {
 				v.state[variable] = string(data)
 			}
 		}
+	case "write":
+		file := action.params[0]
+		file = v.processTokenString(file)
+		data := action.params[1]
+		data = v.processTokenString(data)
+		err := ioutil.WriteFile(file, []byte(data), 0644)
+		if err != nil {
+			log.Fatal("Unable to write to file:", err)
+		}
+		info.Println("Wrote to file:", file)
 	default:
 		fmt.Println(action)
 	}

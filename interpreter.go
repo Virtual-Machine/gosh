@@ -105,6 +105,7 @@ func (v *vm) execute(action vmAction) {
 		if err != nil {
 			log.Fatal("Unable to change directory to: ", dir)
 		}
+		info.Println("Changed to directory: " + dir)
 	case "rm":
 		file := action.params[0]
 		file = v.processTokenString(file)
@@ -134,6 +135,7 @@ func (v *vm) execute(action vmAction) {
 				if err != nil {
 					log.Fatal(err)
 				}
+				info.Println("Copied: " + source + " to: " + destination)
 			} else if err != nil {
 				log.Fatal("Unexpected error", err)
 			} else {
@@ -157,11 +159,28 @@ func (v *vm) execute(action vmAction) {
 				if err != nil {
 					log.Fatal(err)
 				}
+				info.Println("Moved: " + source + " to: " + destination)
 			} else if err != nil {
 				log.Fatal("Unexpected error", err)
 			} else {
 				log.Fatal("Destination already exists, mv can't overwrite")
 			}
+		}
+	case "read":
+		source := action.params[0]
+		source = v.processTokenString(source)
+		_, err := os.Stat(source)
+		if err != nil && os.IsNotExist(err) {
+			log.Fatal("Source not found: " + source)
+		} else if err != nil {
+			log.Fatal("Unexpected error", err)
+		} else {
+			data, err := ioutil.ReadFile(source)
+			if err != nil {
+				log.Fatal("Unable to read data from file")
+			}
+			info.Println("Read data from: " + source)
+			fmt.Println(string(data))
 		}
 	default:
 		fmt.Println(action)

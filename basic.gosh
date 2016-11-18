@@ -19,3 +19,5 @@ exec "ls tester"
 exec "ls"
 rm cool
 rm tester
+
+read README.md

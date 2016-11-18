@@ -1,0 +1,16 @@
+%YAML 1.2
+---
+name: gosh
+file_extensions: gosh
+scope: source.gosh
+
+contexts:
+  main:
+    - match: ^(create|cd|rm|exec|set|echo|mkdir|cp|mv|read|write|append|find|each|method)
+      scope: support.function
+    - match: ^#.*$
+      scope: comment
+    - match: \"[^\"]*\"
+      scope: string
+    - match: \$[a-z]*
+      scope: entity

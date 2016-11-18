@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -195,7 +196,6 @@ func (v *vm) execute(action vmAction) {
 		file = v.processTokenString(file)
 		data := action.params[1]
 		data = v.processTokenString(data)
-		data = strings.Replace(data, "\\n", "\n", -1)
 		err := ioutil.WriteFile(file, []byte(data), 0644)
 		if err != nil {
 			log.Fatal("Unable to write to file:", err)
@@ -213,7 +213,6 @@ func (v *vm) execute(action vmAction) {
 
 		defer f.Close()
 
-		data = strings.Replace(data, "\\n", "\n", -1)
 		if _, err = f.WriteString(data); err != nil {
 			log.Fatal(err)
 		}
@@ -228,7 +227,13 @@ func (v *vm) processTokenString(token string) string {
 	if token[0] == '$' {
 		token = v.state[token]
 	}
-	token = strings.Trim(token, "\"")
+	if token[0] == '"' {
+		var err error
+		token, err = strconv.Unquote(token)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	if token[0] == '~' {
 		token = strings.Replace(token, "~", userHome, 1)
 	}

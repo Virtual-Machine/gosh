@@ -195,11 +195,29 @@ func (v *vm) execute(action vmAction) {
 		file = v.processTokenString(file)
 		data := action.params[1]
 		data = v.processTokenString(data)
+		data = strings.Replace(data, "\\n", "\n", -1)
 		err := ioutil.WriteFile(file, []byte(data), 0644)
 		if err != nil {
 			log.Fatal("Unable to write to file:", err)
 		}
 		info.Println("Wrote to file:", file)
+	case "append":
+		file := action.params[0]
+		file = v.processTokenString(file)
+		data := action.params[1]
+		data = v.processTokenString(data)
+		f, err := os.OpenFile(file, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		defer f.Close()
+
+		data = strings.Replace(data, "\\n", "\n", -1)
+		if _, err = f.WriteString(data); err != nil {
+			log.Fatal(err)
+		}
+		info.Println("Appended to file:", file)
 	default:
 		fmt.Println(action)
 	}

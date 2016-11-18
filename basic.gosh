@@ -22,5 +22,6 @@ rm tester
 
 read README.md $readme
 write DUP.md $readme
+append DUP.md "Some additional text\nAnd what not"
 read DUP.md
 rm DUP.md

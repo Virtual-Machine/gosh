@@ -32,7 +32,7 @@ func (v *vm) beginExecution() {
 }
 
 func (v *vm) execute(action vmAction) {
-	info.Println("\033[40mExecuting:", action, "\033[49m")
+	infoPrint("\033[40mExecuting: ", action, "\033[49m")
 	switch action.method {
 	case "echo":
 		for n, i := range action.params {
@@ -82,7 +82,7 @@ func (v *vm) execute(action vmAction) {
 		filename = v.processTokenString(filename)
 		_, err := os.Stat(filename)
 		if err != nil && os.IsNotExist(err) {
-			info.Println("Creating file: " + filename)
+			infoPrint("Creating file: " + filename)
 			ioutil.WriteFile(filename, []byte(""), 0644)
 		} else if err != nil {
 			log.Fatal("Could not create file as expected")
@@ -94,7 +94,7 @@ func (v *vm) execute(action vmAction) {
 		folder = v.processTokenString(folder)
 		_, err := os.Stat(folder)
 		if err != nil && os.IsNotExist(err) {
-			info.Println("Creating folder: " + folder)
+			infoPrint("Creating folder: " + folder)
 			os.Mkdir(folder, 0700)
 		} else if err != nil {
 			log.Fatal("Could not create folder as expected")
@@ -108,7 +108,7 @@ func (v *vm) execute(action vmAction) {
 		if err != nil {
 			log.Fatal("Unable to change directory to: ", dir)
 		}
-		info.Println("Changed to directory: " + dir)
+		infoPrint("Changed to directory: " + dir)
 	case "rm":
 		file := action.params[0]
 		file = v.processTokenString(file)
@@ -118,7 +118,7 @@ func (v *vm) execute(action vmAction) {
 		} else if err != nil {
 			log.Fatal("Could not remove file/directory as expected, try again")
 		} else {
-			info.Println("Removing file/directory: " + file)
+			infoPrint("Removing file/directory: " + file)
 			os.RemoveAll(file)
 		}
 	case "cp":
@@ -138,7 +138,7 @@ func (v *vm) execute(action vmAction) {
 				if err != nil {
 					log.Fatal(err)
 				}
-				info.Println("Copied: " + source + " to: " + destination)
+				infoPrint("Copied: " + source + " to: " + destination)
 			} else if err != nil {
 				log.Fatal("Unexpected error", err)
 			} else {
@@ -162,7 +162,7 @@ func (v *vm) execute(action vmAction) {
 				if err != nil {
 					log.Fatal(err)
 				}
-				info.Println("Moved: " + source + " to: " + destination)
+				infoPrint("Moved: " + source + " to: " + destination)
 			} else if err != nil {
 				log.Fatal("Unexpected error", err)
 			} else {
@@ -186,7 +186,7 @@ func (v *vm) execute(action vmAction) {
 			if err != nil {
 				log.Fatal("Unable to read data from file")
 			}
-			info.Println("Read data from: " + source)
+			infoPrint("Read data from: " + source)
 			if variable == "" {
 				fmt.Println(string(data))
 			} else {
@@ -202,7 +202,7 @@ func (v *vm) execute(action vmAction) {
 		if err != nil {
 			log.Fatal("Unable to write to file:", err)
 		}
-		info.Println("Wrote to file:", file)
+		infoPrint("Wrote to file: ", file)
 	case "append":
 		file := action.params[0]
 		file = v.processTokenString(file)
@@ -218,7 +218,7 @@ func (v *vm) execute(action vmAction) {
 		if _, err = f.WriteString(data); err != nil {
 			log.Fatal(err)
 		}
-		info.Println("Appended to file:", file)
+		infoPrint("Appended to file: ", file)
 	case "find":
 		findText := action.params[0]
 		findText = v.processTokenString(findText)
@@ -272,7 +272,7 @@ func (v *vm) execute(action vmAction) {
 
 			files := v.groups[groupVar]
 			for _, i := range files {
-				info.Println(i)
+				infoPrint(i)
 				if index == -1 {
 					cmdOut, err := exec.Command(cmdName, cmdArgs...).Output()
 					if err != nil {
@@ -370,7 +370,7 @@ func processArguments(args []string) {
 }
 
 func evaluate(filePath string) {
-	info.Println(versionInfo())
+	infoPrint(versionInfo())
 
 	checkFileExists(filePath)
 
@@ -425,7 +425,7 @@ func getContents(filePath string) []byte {
 	if err != nil {
 		log.Fatal("Unable to read file:", filePath)
 	}
-	info.Println("Loaded contents of", filePath)
+	infoPrint("Loaded contents of ", filePath)
 	return contents
 }
 
@@ -444,6 +444,12 @@ func checkFileExists(filePath string) {
 func printHelp() {
 	fmt.Println("Gosh Usage:")
 	fmt.Println("\tgosh script_file [-v]")
+}
+
+func infoPrint(message ...interface{}) {
+	info.Print("\033[32m")
+	info.Print(message...)
+	info.Println("\033[39m")
 }
 
 func versionInfo() string {

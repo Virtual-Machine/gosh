@@ -272,6 +272,7 @@ func (v *vm) execute(action vmAction) {
 
 			files := v.groups[groupVar]
 			for _, i := range files {
+				info.Println(i)
 				if index == -1 {
 					cmdOut, err := exec.Command(cmdName, cmdArgs...).Output()
 					if err != nil {

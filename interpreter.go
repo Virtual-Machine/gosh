@@ -245,7 +245,55 @@ func (v *vm) execute(action vmAction) {
 		} else {
 			log.Fatal("You need to use a group variable for find commands")
 		}
+	case "each":
+		groupVar := action.params[0]
+		if groupVar[0] == '[' && groupVar[1] == ']' {
+			groupVar = groupVar[2:]
+			command := action.params[1]
+			command = strings.Trim(command, "\"")
+			parts := strings.Split(command, " ")
+			cmdName := parts[0]
+			var cmdArgs []string
+			if len(parts) > 1 {
+				for _, i := range parts[1:] {
+					if i[0] == '~' {
+						cmdArgs = append(cmdArgs, strings.Replace(i, "~", userHome, 1))
+					} else {
+						cmdArgs = append(cmdArgs, i)
+					}
+				}
+			}
+			index := -1
+			for n, v := range cmdArgs {
+				if v == "$$" {
+					index = n
+				}
+			}
 
+			files := v.groups[groupVar]
+			for _, i := range files {
+				if index == -1 {
+					cmdOut, err := exec.Command(cmdName, cmdArgs...).Output()
+					if err != nil {
+						fmt.Fprintln(os.Stderr, "There was an error running the command: ", err)
+						os.Exit(1)
+					}
+					fmt.Println(string(cmdOut))
+				} else {
+					copyArgs := make([]string, len(cmdArgs))
+					copy(copyArgs, cmdArgs)
+					copyArgs[index] = i
+					cmdOut, err := exec.Command(cmdName, copyArgs...).Output()
+					if err != nil {
+						fmt.Fprintln(os.Stderr, "There was an error running the command: ", err)
+						os.Exit(1)
+					}
+					fmt.Println(string(cmdOut))
+				}
+			}
+		} else {
+			log.Fatal("You need to use a group variable for find commands")
+		}
 	default:
 		fmt.Println(action)
 	}

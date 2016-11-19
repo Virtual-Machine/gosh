@@ -27,4 +27,4 @@ read DUP.md
 rm DUP.md
 
 find "*.txt" []textfiles
-#each []textfiles "cat $$"
+each []textfiles "cat $$"

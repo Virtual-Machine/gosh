@@ -20,10 +20,12 @@ type vmAction struct {
 type vm struct {
 	actions []vmAction
 	state   map[string]string
+	groups  map[string][]string
 }
 
 func (v *vm) beginExecution() {
 	v.state = make(map[string]string)
+	v.groups = make(map[string][]string)
 	for _, i := range v.actions {
 		v.execute(i)
 	}
@@ -217,6 +219,33 @@ func (v *vm) execute(action vmAction) {
 			log.Fatal(err)
 		}
 		info.Println("Appended to file:", file)
+	case "find":
+		findText := action.params[0]
+		findText = v.processTokenString(findText)
+		groupVar := action.params[1]
+		if groupVar[0] == '[' && groupVar[1] == ']' {
+			groupVar = groupVar[2:]
+			curDir, err := os.Getwd()
+			if err != nil {
+				log.Fatal(err)
+			}
+			cmdOut, err := exec.Command("find", curDir, "-iname", findText).Output()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "There was an error running the command: ", err)
+				os.Exit(1)
+			}
+			files := bytes.Split(cmdOut, []byte("\n"))
+			var found []string
+			for _, i := range files {
+				if len(i) > 0 {
+					found = append(found, string(i))
+				}
+			}
+			v.groups[groupVar] = found
+		} else {
+			log.Fatal("You need to use a group variable for find commands")
+		}
+
 	default:
 		fmt.Println(action)
 	}
@@ -263,9 +292,8 @@ func init() {
 	method["echo"] = 2
 	method["find"] = 3
 	method["each"] = 3
-	method["method"] = 3
 	method["exec"] = 2
-	regex = regexp.MustCompile(`("[^"]+"|\$?[\w\/~\.]+)`)
+	regex = regexp.MustCompile(`("[^"]+"|[\$\[]?\]?[\w\/~\.]+)`)
 	userHome = os.Getenv("HOME")
 }
 

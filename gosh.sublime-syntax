@@ -10,9 +10,20 @@ contexts:
       scope: support.function
     - match: ^#.*$
       scope: comment
-    - match: \"[^\"]*\"
-      scope: string
-    - match: \$[a-z]*
-      scope: entity
-    - match: \[\][a-z]*
+    - match: (\$)([a-z]*)
+      captures:
+        1: entity
+        2: string
+    - match: (\[\])([a-z]*)
+      captures:
+        1: keyword
+        2: string
+    - match: \"
+      push: string
+
+  string:
+    - meta_scope: string.quoted.double.c
+    - match: \$\$
       scope: keyword
+    - match: \"
+      pop: true

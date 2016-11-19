@@ -14,3 +14,5 @@ contexts:
       scope: string
     - match: \$[a-z]*
       scope: entity
+    - match: \[\][a-z]*
+      scope: keyword
